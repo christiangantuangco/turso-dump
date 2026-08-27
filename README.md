@@ -19,8 +19,6 @@ turso-dump > SELECT * FROM nodes;
 -- 2 row(s) in 0.22ms
 ```
 
-Full specification: [`TURSO_DUMP_SPEC.html`](TURSO_DUMP_SPEC.html).
-
 ## Build
 
 ```bash
