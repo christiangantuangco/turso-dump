@@ -92,7 +92,7 @@ History persists across runs in `~/.turso_dump_history`.
 
 ## Errors
 
-A failing statement prints to stderr and the session continues — only an unreadable terminal ends it:
+A failing statement prints to stderr and the session continues - only an unreadable terminal ends it:
 
 ```
 turso-dump > SELECT bad syntax;
@@ -115,6 +115,6 @@ Error: failed to prepare the statement: Parse error: no such column: bad
 | Crate | Why |
 | --- | --- |
 | `turso` | The database engine |
-| `tokio` | Async runtime — the turso API is async |
+| `tokio` | Async runtime - the turso API is async |
 | `rustyline` | Line editing, history, and the prompt |
 | `anyhow` | Error handling |
