@@ -7,8 +7,6 @@ mod sql;
 use anyhow::{bail, Context, Result};
 use turso::Builder;
 
-const DEFAULT_DB_PATH: &str = "node.db";
-
 #[tokio::main]
 async fn main() -> Result<()> {
     let args: Vec<String> = std::env::args().skip(1).collect();
@@ -30,7 +28,13 @@ async fn main() -> Result<()> {
         }
     }
 
-    let db_path = db_path.unwrap_or_else(|| DEFAULT_DB_PATH.to_string());
+    let db_path = match db_path {
+        Some(path) => path,
+        None => {
+            eprintln!("database path is required");
+            bail!("missing database path");
+        }
+    };
 
     let db = Builder::new_local(&db_path)
         .build()
@@ -46,9 +50,9 @@ async fn main() -> Result<()> {
 }
 
 fn print_usage() {
-    println!("usage: turso-dump [options] [database]");
+    println!("usage: turso-dump [options] <database>");
     println!();
-    println!("  database        path to the database file (default: {DEFAULT_DB_PATH})");
+    println!("  database        path to the database file, created if it does not exist");
     println!("  -d, --dump      dump every table and exit instead of opening a session");
     println!("  -h, --help      show this help");
 }
