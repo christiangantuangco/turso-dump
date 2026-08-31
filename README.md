@@ -30,20 +30,19 @@ The binary lands at `target/release/turso-dump`.
 ## Usage
 
 ```
-usage: turso-dump [options] [database]
+usage: turso-dump [options] <database>
 
-  database        path to the database file (default: node.db)
+  database        path to the database file, created if it does not exist
   -d, --dump      dump every table and exit instead of opening a session
   -h, --help      show this help
 ```
 
-Running with no `--dump` opens the interactive session. The database file is created if it does not
-exist.
+The database path is required - there is no default. Running with no `--dump` opens the interactive
+session. The database file is created if it does not exist.
 
 ```bash
 cargo run -- some.db          # interactive session
 cargo run -- -d some.db       # dump every table, then exit
-cargo run                     # interactive session against node.db
 ```
 
 ## The session
