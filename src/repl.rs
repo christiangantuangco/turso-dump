@@ -1,10 +1,9 @@
-use std::path::PathBuf;
-use std::time::Instant;
-
 use anyhow::{Context, Result};
 use rustyline::error::ReadlineError;
 use rustyline::DefaultEditor;
-use turso::Connection;
+use std::path::PathBuf;
+use std::time::Instant;
+use turso::{Connection, Value};
 
 use crate::catalog;
 use crate::dump;
@@ -116,18 +115,32 @@ async fn run_statement(conn: &Connection, statement: &str) -> Result<()> {
     let mut rows = stmt.query(()).await.context("failed to run the query")?;
 
     let mut cells: Vec<Vec<String>> = Vec::new();
+    let mut numeric_columns = vec![true; columns.len()];
     while let Some(row) = rows.next().await.context("failed to read a row")? {
         let mut values: Vec<String> = Vec::with_capacity(columns.len());
-        for index in 0..columns.len() {
+        for (index, numeric_column) in numeric_columns.iter_mut().enumerate() {
             let value = row
                 .get_value(index)
                 .context("failed to read a column value")?;
+            if !matches!(value, Value::Null) {
+                *numeric_column &= output::is_numeric_value(&value);
+            }
             values.push(output::format_value(&value));
         }
         cells.push(values);
     }
 
-    print!("{}", output::render_table(&columns, &cells));
+    let alignments: Vec<output::Alignment> = numeric_columns
+        .iter()
+        .map(|&numeric| {
+            if numeric {
+                output::Alignment::Right
+            } else {
+                output::Alignment::Left
+            }
+        })
+        .collect();
+    print!("{}", output::render_table(&columns, &cells, &alignments));
     println!(
         "-- {} row(s) in {}",
         cells.len(),
