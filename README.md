@@ -10,12 +10,10 @@ connected to node.db
 enter SQL terminated by ';', or .help for commands, .quit to exit
 
 turso-dump > SELECT * FROM nodes;
-┌────┬────────────────┬───────┬─────────────┐
-│ id │ name           │ score │ payload     │
-├────┼────────────────┼───────┼─────────────┤
-│ 1  │ alice          │ 9.5   │ x'deadbeef' │
-│ 2  │ bob;with;semis │ 3.14  │ NULL        │
-└────┴────────────────┴───────┴─────────────┘
+ id | name           | score | payload
+----+----------------+-------+-------------
+  1 | alice          |   9.5 | x'deadbeef'
+  2 | bob;with;semis |  3.14 | NULL
 -- 2 row(s) in 0.22ms
 ```
 

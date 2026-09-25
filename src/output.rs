@@ -1,5 +1,4 @@
 use std::time::Duration;
-
 use turso::Value;
 
 const BLOB_HEX_LIMIT: usize = 24;
@@ -25,8 +24,23 @@ pub(crate) fn format_elapsed(elapsed: Duration) -> String {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum Alignment {
+    Left,
+    Right,
+}
+
 #[must_use]
-pub(crate) fn render_table(columns: &[String], rows: &[Vec<String>]) -> String {
+pub(crate) fn is_numeric_value(value: &Value) -> bool {
+    matches!(value, Value::Integer(_) | Value::Real(_))
+}
+
+#[must_use]
+pub(crate) fn render_table(
+    columns: &[String],
+    rows: &[Vec<String>],
+    alignments: &[Alignment],
+) -> String {
     if columns.is_empty() {
         return String::new();
     }
@@ -47,41 +61,48 @@ pub(crate) fn render_table(columns: &[String], rows: &[Vec<String>]) -> String {
     }
 
     let mut out = String::new();
-    out.push_str(&border(&widths, '┌', '┬', '┐'));
-    out.push_str(&data_row(&headers, &widths));
-    out.push_str(&border(&widths, '├', '┼', '┤'));
+    out.push_str(&data_row(&headers, &widths, &[]));
+    out.push_str(&separator(&widths));
     for row in &body {
-        out.push_str(&data_row(row, &widths));
+        out.push_str(&data_row(row, &widths, alignments));
     }
-    out.push_str(&border(&widths, '└', '┴', '┘'));
     out
 }
 
-fn border(widths: &[usize], left: char, middle: char, right: char) -> String {
+fn separator(widths: &[usize]) -> String {
     let mut out = String::new();
-    out.push(left);
     for (index, width) in widths.iter().enumerate() {
         if index > 0 {
-            out.push(middle);
+            out.push('+');
         }
-        out.push_str(&"─".repeat(width + 2));
+        out.push_str(&"-".repeat(width + 2));
     }
-    out.push(right);
     out.push('\n');
     out
 }
 
-fn data_row(cells: &[String], widths: &[usize]) -> String {
+fn data_row(cells: &[String], widths: &[usize], alignments: &[Alignment]) -> String {
     let mut out = String::new();
-    out.push('│');
     for (index, width) in widths.iter().enumerate() {
+        if index > 0 {
+            out.push('|');
+        }
         let empty = String::new();
         let cell = cells.get(index).unwrap_or(&empty);
         let padding = width.saturating_sub(display_width(cell));
+        let alignment = alignments.get(index).copied().unwrap_or(Alignment::Left);
         out.push(' ');
-        out.push_str(cell);
-        out.push_str(&" ".repeat(padding));
-        out.push_str(" │");
+        match alignment {
+            Alignment::Right => {
+                out.push_str(&" ".repeat(padding));
+                out.push_str(cell);
+            }
+            Alignment::Left => {
+                out.push_str(cell);
+                out.push_str(&" ".repeat(padding));
+            }
+        }
+        out.push(' ');
     }
     out.push('\n');
     out
