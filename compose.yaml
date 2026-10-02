@@ -1,0 +1,13 @@
+services:
+  turso-dump:
+    build: .
+    image: turso-dump
+    stdin_open: true
+    tty: true
+    volumes:
+      - ${DB_DIR:-/var/lib/opensff/mm}:/data
+      - history:/history
+    command: ["/data/${DB_FILE:-node.db}"]
+
+volumes:
+  history:
